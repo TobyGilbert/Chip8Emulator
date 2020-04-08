@@ -17,8 +17,8 @@ include_directories(${SDL2_INCLUDE_DIRS})
 set(PROJECT_HEADERS include/emulator.hpp include/window_manager.hpp include/window.hpp)
 set(PROJECT_SOURCES ${PROJECT_HEADERS} src/emulator.cpp src/window_manager.cpp src/window.cpp)
 
-add_executable(chip8EMU src/main.cpp ${PROJECT_SOURCES})
-target_link_libraries(chip8EMU ${SDL2_LIBRARIES})
+add_executable(Chip8Emulator src/main.cpp ${PROJECT_SOURCES})
+target_link_libraries(Chip8Emulator ${SDL2_LIBRARIES})
 
 ##################
 # Testing
