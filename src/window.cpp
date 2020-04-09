@@ -16,7 +16,6 @@ Window::~Window()
 
 void Window::destroy()
 {
-    SDL_DestroyRenderer(renderer_);
     SDL_DestroyWindow(window_);
 
     std::cout << "Window destroyed: " << window_name_ << std::endl;
@@ -24,24 +23,20 @@ void Window::destroy()
 
 void Window::initialise()
 {
-    // SDL_Init(SDL_INIT_EVERYTHING);
+    window_ = SDL_CreateWindow(window_name_.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_SHOWN);
 
-    window_ = SDL_CreateWindow(window_name_.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 800, 600, SDL_WINDOW_SHOWN);
+    if (!window_)
+    {
+        throw std::runtime_error("SDL failed to create window: " + window_name_);
+    }
 
-    renderer_ = SDL_CreateRenderer(window_, -1, 0);
+    surface_ = SDL_GetWindowSurface(window_);
 
-    SDL_SetRenderDrawColor(renderer_, 0, 255, 0, 255);
+    if (!surface_)
+    {
+        throw std::runtime_error("SDL failed to get window surface!");
+    }
 
-    SDL_RenderClear(renderer_);
-
-    SDL_RenderPresent(renderer_);
-
-    // SDL_Delay(3000);
-
-    // SDL_DestroyRenderer(renderer);
-
-    // SDL_DestroyWindow(window);
-
-    // SDL_Quit();
+    SDL_UpdateWindowSurface(window_);
 }
 } // namespace chip8emu

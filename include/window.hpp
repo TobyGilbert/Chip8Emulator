@@ -17,8 +17,7 @@ private:
     void destroy();
 
     SDL_Window *window_;
-    SDL_Renderer *renderer_;
-
+    SDL_Surface *surface_;
     std::string window_name_;
 };
 } // namespace chip8emu

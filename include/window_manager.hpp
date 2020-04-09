@@ -3,6 +3,7 @@
 
 #include <string>
 #include <map>
+#include <memory>
 
 #include "window.hpp"
 
@@ -17,10 +18,14 @@ public:
     void AddWindow(std::string window_name);
 
 private:
+    WindowManager(WindowManager const &other);
+    WindowManager &operator=(WindowManager const &other);
+
     void Initialise();
     void Destroy();
 
     std::map<std::string, std::unique_ptr<Window>> windows_;
+    // std::unique_ptr<Window> window_;
 };
 } // namespace chip8emu
 

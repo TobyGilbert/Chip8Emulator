@@ -1,0 +1,21 @@
+{
+    "C_Cpp.default.configurationProvider": "vector-of-bool.cmake-tools",
+    "files.associations": {
+        "SConstruct": "python",
+        "SConscript": "python",
+        "iosfwd": "cpp",
+        "map": "cpp",
+        "memory": "cpp",
+        "stdexcept": "cpp"
+    },
+    "cmake.debugConfig": {
+        "stopAtEntry": false,
+        "MIMode": "lldb",
+        "miDebuggerPath": "/Users/TobyGilbert/.vscode/extensions/ms-vscode.cpptools-0.27.0/debugAdapters/lldb-mi/bin/lldb-mi",
+        "logging": {
+            "trace": true,
+            "engineLogging": true,
+            "traceResponse": true
+        }
+    }
+}

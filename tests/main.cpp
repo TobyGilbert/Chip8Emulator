@@ -11,9 +11,9 @@ TEST(Emulator, CanBeInitialized)
     chip8emu::Emulator emulator;
 }
 
-TEST(Window, CanBeInitialised)
+TEST(WindowManager, CanAddANewWindow)
 {
-    auto window_manager = chip8emu::WindowManager();
+    chip8emu::WindowManager window_manager;
 
     window_manager.AddWindow("test");
 }

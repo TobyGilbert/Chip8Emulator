@@ -31,5 +31,9 @@
 *.out
 *.app
 
-# Build directory
+# CMake
+CMakeCache.txt
+
+# Directories
 build/
+roms/

@@ -14,8 +14,8 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 find_package(SDL2 REQUIRED)
 include_directories(${SDL2_INCLUDE_DIRS})
 
-set(PROJECT_HEADERS include/emulator.hpp include/window_manager.hpp include/window.hpp)
-set(PROJECT_SOURCES ${PROJECT_HEADERS} src/emulator.cpp src/window_manager.cpp src/window.cpp)
+set(PROJECT_HEADERS include/emulator.hpp include/window.hpp include/window_manager.hpp)
+set(PROJECT_SOURCES ${PROJECT_HEADERS} src/emulator.cpp src/window.cpp src/window_manager.cpp)
 
 add_executable(Chip8Emulator src/main.cpp ${PROJECT_SOURCES})
 target_link_libraries(Chip8Emulator ${SDL2_LIBRARIES})

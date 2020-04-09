@@ -18,7 +18,10 @@ WindowManager::~WindowManager()
 
 void WindowManager::Initialise()
 {
-    SDL_Init(SDL_INIT_EVERYTHING);
+    if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
+    {
+        throw std::runtime_error("SDL failed to initialise!");
+    }
 }
 
 void WindowManager::Destroy()
