@@ -8,7 +8,7 @@
 #include "emulator.hpp"
 #include "renderer.hpp"
 
-const std::string rom_file_path = "roms/brix.c8";
+const std::string rom_file_path = "roms/tetris.c8";
 
 struct ApplicationData
 {
