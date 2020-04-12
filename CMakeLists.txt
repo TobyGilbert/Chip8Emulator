@@ -36,8 +36,8 @@ include_directories(${GLAD_INCLUDE_DIR})
 
 # set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -framework Cocoa -framework OpenGL -framework IOKit")
 
-set(PROJECT_HEADERS include/emulator.hpp)
-set(PROJECT_SOURCES ${PROJECT_HEADERS} src/emulator.cpp)
+set(PROJECT_HEADERS include/emulator.hpp include/renderer.hpp)
+set(PROJECT_SOURCES ${PROJECT_HEADERS} src/emulator.cpp src/renderer.cpp)
 
 add_executable(Chip8Emulator src/main.cpp ${PROJECT_SOURCES})
 # SDL2

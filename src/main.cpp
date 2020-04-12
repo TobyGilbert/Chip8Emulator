@@ -6,8 +6,15 @@
 #include <GLFW/glfw3.h>
 
 #include "emulator.hpp"
+#include "renderer.hpp"
 
 const std::string rom_file_path = "roms/brix.c8";
+
+struct ApplicationData
+{
+    chip8emu::Emulator *emulator;
+    chip8emu::Renderer *renderer;
+};
 
 static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
@@ -16,8 +23,8 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
         glfwSetWindowShouldClose(window, GLFW_TRUE);
     }
 
-    auto emulator = reinterpret_cast<chip8emu::Emulator *>(glfwGetWindowUserPointer(window));
-
+    auto data = reinterpret_cast<ApplicationData *>(glfwGetWindowUserPointer(window));
+    auto emulator = data->emulator;
     // Key Pressed
     {
         if (key == GLFW_KEY_1 && action == GLFW_PRESS)
@@ -157,7 +164,7 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height)
 {
-    glViewport(0, 0, width, height);
+    // renderer.Resize(width, height);
 }
 
 int main()
@@ -198,89 +205,14 @@ int main()
             throw std::runtime_error("Failed to initialise GLAD");
         }
 
-        glViewport(0, 0, 64 * 10, 32 * 10);
-        glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
-
-        // Create screen space quad
-        unsigned int VAO;
-        glGenVertexArrays(1, &VAO);
-        glBindVertexArray(VAO);
-
-        float vertices[] = {
-            -1.0f, -1.0f, 0.0f,
-            1.0f, 1.0f, 0.0f,
-            1.0f, -1.0f, 0.0f,
-            -1.0f, -1.0f, 0.0f,
-            -1.0f, 1.0f, 0.0f,
-            1.0, 1.0f, 0.0f};
-        unsigned int VBO;
-        glGenBuffers(1, &VBO);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
-        glEnableVertexAttribArray(0);
-
-        // Screen shaders
-        const char *vertex_shader_source = "#version 410\n"
-                                           "layout(location = 0) in vec3 position;\n"
-                                           "out vec2 texture_coordinate;"
-                                           "void main()\n"
-                                           "{\n"
-                                           "    gl_Position = vec4(position, 1.0);\n"
-                                           "    texture_coordinate = position.xy * 0.5 + 0.5;"
-                                           "}\0";
-        unsigned int vertex_shader;
-        vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(vertex_shader, 1, &vertex_shader_source, NULL);
-        glCompileShader(vertex_shader);
-
-        const char *fragment_shader_source = "#version 330 core\n"
-                                             "uniform sampler2D screen_texture;\n"
-                                             "in vec2 texture_coordinate;"
-                                             "out vec4 FragColor;\n"
-                                             "void main()\n"
-                                             "{\n"
-                                             "    FragColor = texture(screen_texture, texture_coordinate);\n"
-                                             "}\0 ";
-
-        unsigned int fragment_shader;
-        fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(fragment_shader, 1, &fragment_shader_source, NULL);
-        glCompileShader(fragment_shader);
-
-        unsigned int shader_program;
-        shader_program = glCreateProgram();
-        glAttachShader(shader_program, vertex_shader);
-        glAttachShader(shader_program, fragment_shader);
-        glLinkProgram(shader_program);
-        glUseProgram(shader_program);
-
-        glDeleteShader(vertex_shader);
-        glDeleteShader(fragment_shader);
-
-        // Texture to write chip8 screen to
-        unsigned int screen_texture;
-        glGenTextures(1, &screen_texture);
-        glBindTexture(GL_TEXTURE_2D, screen_texture);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-        float borderColor[] = {1.0f, 1.0f, 0.0f, 1.0f};
-        glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, 64, 32, 0, GL_RED, GL_UNSIGNED_BYTE, NULL);
-        glGenerateMipmap(GL_TEXTURE_2D);
-
-        glEnable(GL_TEXTURE_2D);
-
-        glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, screen_texture);
-        glUniform1i(glGetUniformLocation(shader_program, "screen_texture"), 0);
+        chip8emu::Renderer renderer;
+        renderer.Resize(64 * 10, 32 * 10);
 
         // Initialise the Chip8 system and load the game into memory
         chip8emu::Emulator emulator;
-        glfwSetWindowUserPointer(window, &emulator);
+
+        ApplicationData data{&emulator, &renderer};
+        glfwSetWindowUserPointer(window, &data);
 
         emulator.LoadROM(rom_file_path);
 
@@ -308,27 +240,14 @@ int main()
                         data[data_index++] = pixels[x + (y * 64)] * 255;
                     }
                 }
-                glBindTexture(GL_TEXTURE_2D, screen_texture);
-                glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 64, 32, GL_RED, GL_UNSIGNED_BYTE, data);
-
+                renderer.UpdateTexture(data);
                 emulator.SetScreenRedrawFlagToFalse();
             }
 
-            glClear(GL_COLOR_BUFFER_BIT);
-
-            glUseProgram(shader_program);
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, screen_texture);
-            glBindVertexArray(VAO);
-            glDrawArrays(GL_TRIANGLES, 0, 6);
+            renderer.Render();
 
             glfwSwapBuffers(window);
         }
-
-        glDeleteTextures(1, &screen_texture);
-        glDeleteProgram(shader_program);
-        glDeleteVertexArrays(1, &VAO);
-        glDeleteBuffers(1, &VBO);
 
         glfwDestroyWindow(window);
 
