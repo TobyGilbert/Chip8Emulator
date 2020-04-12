@@ -2,6 +2,7 @@
 #define EMULATOR_HPP_
 
 #include <array>
+#include <vector>
 
 namespace chip8emu
 {
@@ -12,10 +13,43 @@ public:
     ~Emulator();
 
     void LoadROM(std::string file_path);
+    void LoadROM(std::vector<unsigned char> raw_data);
+    void UnloadROM();
     void EmulateCycle();
+
+    enum KeyCode
+    {
+        KEYCODE_X,
+        KEYCODE_1,
+        KEYCODE_2,
+        KEYCODE_3,
+        KEYCODE_Q,
+        KEYCODE_W,
+        KEYCODE_E,
+        KEYCODE_A,
+        KEYCODE_S,
+        KEYCODE_D,
+        KEYCODE_Z,
+        KEYCODE_C,
+        KEYCODE_4,
+        KEYCODE_R,
+        KEYCODE_F,
+        KEYCODE_V
+    };
+
+    void KeyPressed(KeyCode key_code);
+    void KeyReleased(KeyCode key_code);
+    bool DoesScreenNeedRedraw();
+    void SetScreenRedrawFlagToFalse();
+    inline std::array<unsigned char, 64 * 32> GetScreenPixels() { return screen_pixels_; }
+    void DebugDraw();
 
 private:
     void Initialise();
+    /// Returns the next opcode
+    unsigned short AcquireNextOpcode();
+    void DecodeOpcode(unsigned short opcode);
+    void UpdateTimers();
 
     std::array<unsigned char, 4096> memory_ = {};
     // V
@@ -28,6 +62,7 @@ private:
     unsigned short program_counter_ = 0;
     // gfx
     std::array<unsigned char, 64 * 32> screen_pixels_ = {};
+    bool draw_flag_ = false;
     // Two timer registers (delay_timer_ and sound_timer_) that count at 60 Hz.
     // When set above zero they will count down to zero.
     unsigned char delay_timer_;
@@ -59,6 +94,8 @@ private:
         0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
         0xF0, 0x80, 0xF0, 0x80, 0x80  // F
     };
+
+    bool is_rom_loaded = false;
 };
 } // namespace chip8emu
 

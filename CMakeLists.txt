@@ -14,11 +14,41 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 find_package(SDL2 REQUIRED)
 include_directories(${SDL2_INCLUDE_DIRS})
 
-set(PROJECT_HEADERS include/emulator.hpp include/window.hpp include/window_manager.hpp)
-set(PROJECT_SOURCES ${PROJECT_HEADERS} src/emulator.cpp src/window.cpp src/window_manager.cpp)
+# GLFW
+find_package(GLFW3 REQUIRED)
+include_directories(${GLFW3_INCLUDE_DIR})
+
+# 
+IF(APPLE)
+    INCLUDE_DIRECTORIES ( /Developer/Headers/FlatCarbon )
+    find_library(COCOA_LIBRARY Cocoa)
+    find_library(COREVIDEO_LIBRARY CoreVideo)
+    find_library(IOKIT_LIBRARY IOKit)
+    find_library(OPENGL_LIBRARY OpenGL)
+    MARK_AS_ADVANCED (COCOA_LIBRARY IOKIT_LIBRARY COREVIDEO_LIBRARY OPENGL_LIBRARY)
+    SET(EXTRA_LIBS ${COCOA_LIBRARY} ${IOKIT_LIBRARY} ${COREVIDEO_LIBRARY} ${OPENGL_LIBRARY})
+ENDIF (APPLE)
+
+# glad
+find_package(GLAD REQUIRED)
+include_directories(${GLAD_INCLUDE_DIR})
+
+
+# set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -framework Cocoa -framework OpenGL -framework IOKit")
+
+set(PROJECT_HEADERS include/emulator.hpp)
+set(PROJECT_SOURCES ${PROJECT_HEADERS} src/emulator.cpp)
 
 add_executable(Chip8Emulator src/main.cpp ${PROJECT_SOURCES})
+# SDL2
 target_link_libraries(Chip8Emulator ${SDL2_LIBRARIES})
+# GLFW
+target_link_libraries(Chip8Emulator ${GLFW3_LIBRARY})
+target_link_libraries(Chip8Emulator ${EXTRA_LIBS})
+# glad
+target_link_libraries(Chip8Emulator ${GLAD_LIBRARY})
+
+
 
 ##################
 # Testing
@@ -59,5 +89,11 @@ endif()
 # Now simply link against gtest or gtest_main as needed. Eg
 add_executable(tests ${PROJECT_SOURCES} tests/main.cpp)
 target_link_libraries (tests gmock_main)
+# SDL
 target_link_libraries(tests ${SDL2_LIBRARIES})
+# GLFW
+target_link_libraries(tests ${GLFW3_LIBRARY})
+target_link_libraries(tests ${EXTRA_LIBS})
+# glad
+target_link_libraries(tests ${GLAD_LIBRARY})
 add_test(NAME example_test COMMAND example)
